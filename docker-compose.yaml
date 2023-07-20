@@ -1,0 +1,61 @@
+version: '3.9'
+
+services:
+  user-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "10001:80"
+    links:
+      - user_database
+    depends_on:
+      - user_database
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - CONNECTION_STRING=Host=user_database;Username=postgres;Password=23022005;Database=User_DB;
+
+  product-service:
+    build:
+      context: ./ProductService/
+      dockerfile: Dockerfile
+    ports:
+      - "9000:9000"
+    links:
+      - product_database
+    depends_on:
+      - product_database
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:9000
+      - CONNECTION_STRING=Host=product_database;Username=postgres;Password=23022005;Database=Product_DB;
+    
+  user_database:
+    image: postgres:14-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=User_DB
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=23022005
+    volumes:
+      - user-db-volume:/var/lib/postgresql/data
+
+  product_database:
+    image: postgres:14-alpine
+    ports: 
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=Product_DB
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=23022005
+    volumes:
+      - product-db-volume:/var/lib/postgresql/data
+
+
+volumes:
+  user-db-volume:
+    driver: local
+  product-db-volume:
+    driver: local  
